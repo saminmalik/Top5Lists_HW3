@@ -52,6 +52,17 @@ export const useGlobalStore = () => {
                     listMarkedForDeletion: null
                 });
             }
+            // CREATE NEW LIST----------
+            case GlobalStoreActionType.CREATE_NEW_LIST: {
+                return setStore({
+                    idNamePairs: payload,
+                    currentList: store.currentList,
+                    newListCounter: store.newListCounter+1,
+                    isListNameEditActive: false,
+                    isItemEditActive: false,
+                    listMarkedForDeletion: null
+                });
+            }
             // STOP EDITING THE CURRENT LIST
             case GlobalStoreActionType.CLOSE_CURRENT_LIST: {
                 return setStore({
@@ -136,7 +147,34 @@ export const useGlobalStore = () => {
         }
         asyncChangeListName(id);
     }
-
+    //------------------------------------
+    store.createNewList = () => {
+        async function asyncCreateNewList() {
+            let newName = "Untitled" + store.newListCounter;
+            let newList = {
+                name: newName,
+                items: ["?", "?", "?", "?", "?"]
+            };
+            let response = await api.createTop5List(newList);
+            if (response.data.success) {
+                let top5List = response.data.top5List;
+                store.setCurrentList(top5List._id);
+                async function getListPairs() {
+                    response = await api.getTop5ListPairs();
+                    if (response.data.success) {
+                        let pairsArray = response.data.idNamePairs;
+                        storeReducer({
+                            type: GlobalStoreActionType.CREATE_NEW_LIST,
+                            payload: pairsArray
+                        });
+                    }
+                }
+                getListPairs();
+            }
+        }
+        asyncCreateNewList();
+        store.newListCounter = store.newListCounter+1; 
+    }
     // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
     store.closeCurrentList = function () {
         storeReducer({
