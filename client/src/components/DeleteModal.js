@@ -17,7 +17,7 @@ function DeleteModal() {
         name = store.listMarkedForDeletion.name;
     }
     function handleDeleteList(event) {
-        store.deleteMarkedList();
+        store.deleteMarkedList(store.currentList);
     }
     function handleCloseModal(event) {
         store.hideDeleteListModal();
