@@ -1,5 +1,6 @@
-import { React, useContext, useState } from "react";
+import { React, useContext, useState, useEffect} from "react";
 import { GlobalStoreContext } from '../store'
+
 /*
     This React component represents a single item in our
     Top 5 List, which can be edited or moved around.
@@ -9,6 +10,13 @@ import { GlobalStoreContext } from '../store'
 function Top5Item(props) {
     const { store } = useContext(GlobalStoreContext);
     const [draggedTo, setDraggedTo] = useState(0);
+    const [ editActive, setEditActive ] = useState(false);
+    const [ itemName, setItemName] = useState(props.text);
+
+    useEffect(() => {
+        setItemName(props.text); 
+    },[props.text])
+    let { index } = props;
 
     function handleDragStart(event) {
         event.dataTransfer.setData("item", event.target.id);
@@ -42,16 +50,56 @@ function Top5Item(props) {
     }
 
     //---------------
+    function handleToggleEdit(event) {
+        event.stopPropagation();
+        toggleEdit()
+    }
 
+    function toggleEdit() {
+        let newActive = !editActive;
+        if (newActive) {
+            store.setIsItemNameEditActive();
+        }
+        setEditActive(newActive);
+    }
+
+    function handleUpdate(event) {
+        setItemName(event.target.value);
+    }
+    function handleKeyPress(event){
+        if (event.code === "Enter") {
+            handleBlur();
+        }
+    }
+    function handleBlur() {
+        store.addChangeItemTransaction(index, itemName);
+        toggleEdit();
+    }
     //----------------
 
-    let { index } = props;
+    
     let itemClass = "top5-item";
     if (draggedTo) {
         itemClass = "top5-item-dragged-to";
     }
+    //-----------------
+    if (editActive){
+    //------------------
     return (
-        <div
+        <input
+                id={"item-" + (index+1)}
+                className={itemClass}
+                type='text'
+                onKeyPress={handleKeyPress}
+                onBlur={handleBlur}
+                onChange={handleUpdate}
+                defaultValue={props.text}
+            />
+            )
+     }
+     else {
+         return(
+            <div
             id={'item-' + (index + 1)}
             className={itemClass}
             onDragStart={handleDragStart}
@@ -65,11 +113,14 @@ function Top5Item(props) {
                 type="button"
                 id={"edit-item-" + index + 1}
                 className="list-card-button"
-                //onClick={handleToggleEdit}
                 value={"\u270E"}
+                onClick={handleToggleEdit}
             />
-            {props.text}
-        </div>)
+            {itemName}
+        </div>
+         )
+        }    
+    
 }
 
 export default Top5Item;
