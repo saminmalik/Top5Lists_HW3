@@ -21,9 +21,13 @@ function EditToolbar() {
     function handleClose() {
         history.push("/");
         store.closeCurrentList();
+        store.updateToolbarButtons();
     }
     let editStatus = false;
     if (store.isListNameEditActive) {
+        editStatus = true;
+    }
+    if(store.isItemEditActive){
         editStatus = true;
     }
     return (

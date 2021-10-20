@@ -12,7 +12,7 @@ function Top5Item(props) {
     const [draggedTo, setDraggedTo] = useState(0);
     const [ editActive, setEditActive ] = useState(false);
     const [ itemName, setItemName] = useState(props.text);
-
+    store.updateToolbarButtons();
     useEffect(() => {
         setItemName(props.text); 
     },[props.text])
